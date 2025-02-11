@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.core.paginator import Paginator
 from .models import Person
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -69,17 +70,23 @@ class RegisterAPI(APIView):
         serializer.save()
         return Response({'status' : True, 'message' : 'User registered successfully'}
                         , status = status.HTTP_201_CREATED)
-    
 
 class PersonAPI(APIView):
-    authentication_classes = [JWTAuthentication]
-    # authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         person = Person.objects.filter(color__isnull=False) 
-        serializer = PeopleSerializer(person, many=True)
-        return Response(serializer.data)
+        try:
+            page = request.GET.get('page', 1)
+            page_size = 3
+            paginator = Paginator(person, page_size)
+            person = paginator.page(page)
+            serializer = PeopleSerializer(person, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"status":"False",'message':'Invalid Page'})
 
     def post(self, request):
         data = request.data
