@@ -11,6 +11,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 from .serializers import LoginSerializer, PeopleSerializer, RegisterSerializer
 
 class LoginAPI(APIView):
@@ -104,6 +105,7 @@ class PersonAPI(APIView):
             serializer.save()
             return Response(serializer.data)
         raise Exception(serializer.errors)
+        
 
     def patch(self, request):
         data = request.data
@@ -263,3 +265,19 @@ class PeopleViewSet(viewsets.ModelViewSet):
         person = Person.objects.get(id = pk)
         person.delete()
         return Response({'message':"Person deleted"})
+
+    @action(detail=False, methods=['GET'])
+    def welcome_message(self, request):
+        """
+            Sending the welcome message
+        """
+        return Response({'message' : 'Welcome message sent'}) 
+
+    @action(detail=True, methods=['GET'])
+    def welcome_message_person(self, request, pk=None):
+        """
+            Sending the welcome message to the person
+        """
+        
+        return Response({'message' : f'Welcome message sent to person with id {pk}'})    
+    
