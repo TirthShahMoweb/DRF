@@ -1,17 +1,16 @@
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from .models import Person
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import viewsets
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import viewsets,status
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import action, api_view
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination, CursorPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
+from rest_framework.views import APIView
 from .serializers import LoginSerializer, PeopleSerializer, RegisterSerializer
 
 class LoginAPI(APIView):
@@ -41,7 +40,6 @@ class SignInAPI(APIView):
     '''
         Sign In API for JWT Authentication
     '''
-
     def post(self, request):
         data = request.data
         serializer = LoginSerializer(data=data)
@@ -60,13 +58,13 @@ class SignInAPI(APIView):
         })
 
 class RegisterAPI(APIView):
-
+    '''
+        Register API
+    '''
     def post(self, request):
         data = request.data
         serializer = RegisterSerializer(data=data)
         if not serializer.is_valid():
-            # return Response({'status' : False, 'message' : serializer.errors}
-            #                 , status = status.HTTP_400_BAD_REQUEST)
             raise Exception(serializer.errors)
         serializer.save()
         return Response({'status' : True, 'message' : 'User registered successfully'}
@@ -78,6 +76,9 @@ class PersonAPI(APIView):
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        '''
+            Get the list of people by applying Manual pagination
+        '''
         person = Person.objects.filter(color__isnull=False) 
         try:
             page = request.GET.get('page', 1)
@@ -125,6 +126,7 @@ class PersonAPI(APIView):
 @api_view(['GET', 'POST', 'PUT'])
 def index(request):
     if request.method == 'GET':
+
         json_response = {
         'name' : 'Scaler',
         'courses' : ['C++', 'Python'],
@@ -137,6 +139,55 @@ def index(request):
         'method' : 'Post'}
         data = request.data
     return Response(json_response)
+
+class CustomPagination(PageNumberPagination):
+    page_size = 3  # Number of items per page
+    page_size_query_param = 'page_size'  # Allows dynamic page size via query param
+    max_page_size = 100  # Prevents excessive page sizes
+
+@api_view(['GET'])
+def detail_by_PageNumberPagination(request):
+    '''
+        Get the list of people by applying PageNumberPagination
+    '''
+    if request.method == 'GET':
+        person = Person.objects.filter(color__isnull=False).order_by('id')
+        paginator = CustomPagination()
+        person = paginator.paginate_queryset(person, request)
+        serializer = PeopleSerializer(person, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+class CustomLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 3  # Default number of records per page
+    max_limit = 100  # Prevents large data requests
+    offset_query_param = 'skip'
+
+@api_view(['GET'])
+def detail_by_LimitOffSetPagination(request):
+    '''
+        Get the list of people by applying LimitOffsetPagination
+    '''
+    if request.method == 'GET':
+        person = Person.objects.filter(color__isnull=False)
+        paginator = CustomLimitOffsetPagination()
+        person = paginator.paginate_queryset(person, request)
+        serializer = PeopleSerializer(person, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+class CustomCursorPagination(CursorPagination):
+    page_size = 3  # Number of records per page
+    ordering = 'id'  # Field used for ordering results (must be indexed for efficiency)
+
+class PersonCursorAPI(APIView):
+    def get(self, request):
+        '''
+            Get the list of people by applying CursorPagination
+        '''
+        person = Person.objects.all().order_by('id')  
+        paginator = CustomCursorPagination()
+        person = paginator.paginate_queryset(person, request, view=self)
+        serializer = PeopleSerializer(person, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def person(request):
@@ -267,7 +318,7 @@ class PeopleViewSet(viewsets.ModelViewSet):
         return Response({'message':"Person deleted"})
 
     @action(detail=False, methods=['GET'])
-    def welcome_message(self, request):
+    def details(self, request):
         """
             Sending the welcome message
         """
@@ -277,7 +328,5 @@ class PeopleViewSet(viewsets.ModelViewSet):
     def welcome_message_person(self, request, pk=None):
         """
             Sending the welcome message to the person
-        """
-        
+        """ 
         return Response({'message' : f'Welcome message sent to person with id {pk}'})    
-    
