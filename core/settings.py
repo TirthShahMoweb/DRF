@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.customize_middleware.Custom_Middleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -139,4 +140,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
    'rest_framework.permissions.AllowAny',
 ]
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5
 }
