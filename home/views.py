@@ -5,6 +5,7 @@ from rest_framework import viewsets,status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action, api_view
+from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, ListCreateAPIView, RetrieveUpdateAPIView, RetrieveDestroyAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination, CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -330,3 +331,66 @@ class PeopleViewSet(viewsets.ModelViewSet):
             Sending the welcome message to the person
         """ 
         return Response({'message' : f'Welcome message sent to person with id {pk}'})    
+
+class ListPerson(ListAPIView):
+    '''
+        List of people
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class CreatePerson(CreateAPIView):
+    '''
+        Create person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class DeletePerson(DestroyAPIView):
+    '''
+        Delete person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class RetrievePerson(RetrieveAPIView):
+    '''
+        Retrieve person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class UpdatePerson(UpdateAPIView):
+    '''
+        Update person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class ListCreatePerson(ListCreateAPIView):
+    '''
+        Create or List person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class RetrieveUpdatePerson(RetrieveUpdateAPIView):
+    '''
+        Retrieve or Update person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class RetrieveDestroyPerson(RetrieveDestroyAPIView):
+    '''
+        Retrieve or Destroy person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
+
+class RetrieveUpdateDestroyPerson(RetrieveUpdateDestroyAPIView):
+    '''
+        Retrieve, Update or Destroy person
+    '''
+    serializer_class = PeopleSerializer
+    queryset = Person.objects.all()
