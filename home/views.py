@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
-from .models import Person
+from django.db.models import Count, Max,Sum ,Subquery, OuterRef, Avg
+from .models import Person, City, Hobby
 from rest_framework import viewsets,status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -12,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from .serializers import LoginSerializer, PeopleSerializer, RegisterSerializer
+from .serializers import LoginSerializer, PeopleSerializer, RegisterSerializer, CitySerializer
 
 class LoginAPI(APIView):
     """
@@ -68,8 +69,7 @@ class RegisterAPI(APIView):
         if not serializer.is_valid():
             raise Exception(serializer.errors)
         serializer.save()
-        return Response({'status' : True, 'message' : 'User registered successfully'}
-                        , status = status.HTTP_201_CREATED)
+        return Response(serializer.data, status = status.HTTP_201_CREATED)
 
 class PersonAPI(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -221,7 +221,7 @@ def person(request):
     elif request.method == "PATCH":
         data = request.data
         person = Person.objects.get(id=data['id'])
-        print(data, data['id'])
+        # print(data, data['id'])
         serializer = PeopleSerializer(person, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -332,12 +332,20 @@ class PeopleViewSet(viewsets.ModelViewSet):
         """ 
         return Response({'message' : f'Welcome message sent to person with id {pk}'})    
 
-class ListPerson(ListAPIView):
+class ListAPIViewCount(ListAPIView):
     '''
         List of people
     '''
-    serializer_class = PeopleSerializer
-    queryset = Person.objects.all()
+    # avg_hobby_count = Person.objects.annotate(hobby_count=Count('hobbies')).aggregate(Avg('hobby_count'))['hobby_count__avg']
+    # serializer_class = PeopleSerializer
+    queryset = Person.objects.annotate(hobby_count=Count('hobbies'))
+
+    def get_queryset(self):
+        queryset = self.queryset
+        city_name = self.request.query_params.get('city', None) 
+        if city_name:
+            queryset = queryset.filter(city__name=city_name)
+        return queryset
 
 class CreatePerson(CreateAPIView):
     '''
@@ -371,8 +379,9 @@ class ListCreatePerson(ListCreateAPIView):
     '''
         Create or List person
     '''
-    serializer_class = PeopleSerializer
-    queryset = Person.objects.all()
+    serializer_class = CitySerializer
+    queryset = City.objects.annotate(max_age=Max('city_person__age')).filter(max_age__isnull=False)
+    # queryset = City.objects.annotate(max_age=Count('city_person')).filter(max_age__gt=0).order_by('max_age')
 
 class RetrieveUpdatePerson(RetrieveUpdateAPIView):
     '''

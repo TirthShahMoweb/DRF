@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter, SimpleRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,  # Generates access & refresh token
     TokenRefreshView      # Refreshes access token
@@ -24,11 +24,11 @@ urlpatterns = [
     path('limitOffSetPagination/',views.detail_by_LimitOffSetPagination),
     path('pageNumberPagination/',views.detail_by_PageNumberPagination),
     path('cursorPagination/',views.PersonCursorAPI.as_view()),
-    
+
     # Generic Views
     path('createPerson/',views.CreatePerson.as_view()),
     path('deletePerson/<int:pk>/',views.DeletePerson.as_view()),
-    path('listPerson/',views.ListPerson.as_view()),
+    path('Listhobbycount/',views.ListAPIViewCount.as_view()),
     path('updatePerson/<int:pk>/',views.UpdatePerson.as_view()),
     path('retrievePerson/<int:pk>/',views.RetrievePerson.as_view()),
 
@@ -38,6 +38,6 @@ urlpatterns = [
     path('retrieveUpdateDestroyPerson/<int:pk>/',views.RetrieveUpdateDestroyPerson.as_view()),
 
     # Token	
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

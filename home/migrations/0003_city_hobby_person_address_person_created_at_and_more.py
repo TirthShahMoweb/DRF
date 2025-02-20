@@ -30,11 +30,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='person',
-            name='address',
-            field=models.TextField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='person',
             name='created_at',
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
