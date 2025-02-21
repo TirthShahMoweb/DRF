@@ -1,9 +1,8 @@
-from .models import Person, Colour, City
+from .models import Person, Colour, City, Hobby
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.settings import api_settings
-
 
 class RegisterSerializer(serializers.Serializer):
     GENDER_CHOICES = [
@@ -57,16 +56,33 @@ class LoginSerializer(serializers.Serializer):
 class ColourSerializer(serializers.ModelSerializer):
     class Meta:
         model=Colour
-        fields = ['name','id']
+        fields = ('name', 'id')
+
+class HobbySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hobby
+        fields = ('name', 'id')
+
+
+class CitySerializer(serializers.ModelSerializer):
+    max_age = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = City
+        fields = ('id', 'name', 'state', 'country', 'max_age')
 
 class PeopleSerializer(serializers.ModelSerializer):
-    # color = ColourSerializer(read_only=True)
-    hobby_count = serializers.IntegerField(read_only=True)
+    # hobby_count = serializers.IntegerField(read_only=True)
+    # city_name = serializers.StringRelatedField(source='city', read_only=True)
+    # color_id = serializers.PrimaryKeyRelatedField(queryset=Colour.objects.all())
+    # hobby_slugs = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    # city_url = serializers.HyperlinkedRelatedField(view_name='city-detail', read_only=True, source='city')
+    # person_url = serializers.HyperlinkedIdentityField(view_name='person-detail')
     # colour_info = serializers.SerializerMethodField()
  
     class Meta:
         model=Person
-        fields=('name', 'age', 'email','phone','city','hobbies','color','gender','is_active','created_at','updated_at','hobby_count')
+        fields = ('hobbies', 'id', 'name', 'age', 'email', 'phone', 'gender')
         # exclude = [' name' , 'age ']  we don't want to add it
         # fields = '__all__'
         depth = 1
@@ -83,11 +99,3 @@ class PeopleSerializer(serializers.ModelSerializer):
             # if data['age'] < 18:
         #     raise serializers.ValidationError("Age should be greater than 18")
         return data
-    
-class CitySerializer(serializers.ModelSerializer):
-    max_age = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model=City
-        fields = ('name','state','country','max_age')
-    

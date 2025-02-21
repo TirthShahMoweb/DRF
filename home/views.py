@@ -1,8 +1,13 @@
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from django.db.models import Count, Max,Sum ,Subquery, OuterRef, Avg
+from django_filters.rest_framework import DjangoFilterBackend
+
+from .filters import PersonFilter
+
 from .models import Person, City, Hobby
-from rest_framework import viewsets,status
+
+from rest_framework import viewsets, status, filters
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action, api_view
@@ -337,8 +342,12 @@ class ListAPIViewCount(ListAPIView):
         List of people
     '''
     # avg_hobby_count = Person.objects.annotate(hobby_count=Count('hobbies')).aggregate(Avg('hobby_count'))['hobby_count__avg']
-    # serializer_class = PeopleSerializer
+    serializer_class = PeopleSerializer
     queryset = Person.objects.annotate(hobby_count=Count('hobbies'))
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_class = PersonFilter
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['name', 'age']
 
     def get_queryset(self):
         queryset = self.queryset
