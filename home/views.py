@@ -78,14 +78,14 @@ class RegisterAPI(APIView):
 
 class PersonAPI(APIView):
     # authentication_classes = [JWTAuthentication]
-    # # authentication_classes = [TokenAuthentication]
+    # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         '''
             Get the list of people by applying Manual pagination
         '''
-        person = Person.objects.filter(color__isnull=False) 
+        person = Person.objects.select_related('city', 'color').prefetch_related('hobbies').filter(color__isnull=False) 
         try:
             page = request.GET.get('page', 1)
             page_size = 3
@@ -389,7 +389,11 @@ class ListCreatePerson(ListCreateAPIView):
         Create or List person
     '''
     serializer_class = CitySerializer
-    queryset = City.objects.annotate(max_age=Max('city_person__age')).filter(max_age__isnull=False)
+    queryset = City.objects.prefetch_related('city_person') \
+    .annotate(max_age=Max('city_person__age')) \
+    .filter(max_age__isnull=False)
+    
+    # queryset = City.objects.annotate(max_age=Max('city_person__age')).filter(max_age__isnull=False)
     # queryset = City.objects.annotate(max_age=Count('city_person')).filter(max_age__gt=0).order_by('max_age')
 
 class RetrieveUpdatePerson(RetrieveUpdateAPIView):

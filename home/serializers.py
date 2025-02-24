@@ -73,16 +73,16 @@ class CitySerializer(serializers.ModelSerializer):
 
 class PeopleSerializer(serializers.ModelSerializer):
     # hobby_count = serializers.IntegerField(read_only=True)
-    # city_name = serializers.StringRelatedField(source='city', read_only=True)
+    # city_name = serializers.StringRelatedField(source='City', read_only=True)
     # color_id = serializers.PrimaryKeyRelatedField(queryset=Colour.objects.all())
-    # hobby_slugs = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    hobby_slugs = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
     # city_url = serializers.HyperlinkedRelatedField(view_name='city-detail', read_only=True, source='city')
     # person_url = serializers.HyperlinkedIdentityField(view_name='person-detail')
     # colour_info = serializers.SerializerMethodField()
- 
+
     class Meta:
         model=Person
-        fields = ('hobbies', 'id', 'name', 'age', 'email', 'phone', 'gender')
+        fields = ('hobby_slugs', 'name', 'age', 'color', 'hobbies', 'id')
         # exclude = [' name' , 'age ']  we don't want to add it
         # fields = '__all__'
         depth = 1
