@@ -189,7 +189,8 @@ class PersonCursorAPI(APIView):
         '''
             Get the list of people by applying CursorPagination
         '''
-        person = Person.objects.all().order_by('id')  
+        person = Person.objects.select_related('city', 'color') \
+            .prefetch_related('hobbies').all().order_by('id')  
         paginator = CustomCursorPagination()
         person = paginator.paginate_queryset(person, request, view=self)
         serializer = PeopleSerializer(person, many=True)
