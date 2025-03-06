@@ -11,6 +11,6 @@ class ListCreatePerson(ListCreateAPIView):
     queryset = City.objects.all()\
     .annotate(max_age=Max('city_person__age')) \
     .filter(max_age__isnull = False)
-    
+
     # queryset = City.objects.annotate(max_age=Max('city_person__age')).filter(max_age__isnull=False)
     # queryset = City.objects.annotate(max_age=Count('city_person')).filter(max_age__gt=0).order_by('max_age')

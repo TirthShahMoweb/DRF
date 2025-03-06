@@ -53,7 +53,7 @@ class PersonAPI(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        raise Exception(serializer.errors)   
+        raise Exception(serializer.errors)
 
     def patch(self, request):
         data = request.data
@@ -151,7 +151,7 @@ class PeopleViewSet(viewsets.ModelViewSet):
         person = Person.objects.get(id = pk)
         serializer = PeopleSerializer(person)
         return Response(serializer.data, status = status.HTTP_200_OK)
-        
+
     def update(self, request, pk=None):
         """
             Updating the person
@@ -179,7 +179,7 @@ class PeopleViewSet(viewsets.ModelViewSet):
         raise Exception(serializer.errors)
 
     def destroy(self, request, pk=None):
-        """        
+        """
             Deleting the person
         """
         person = Person.objects.get(id = pk)
@@ -191,15 +191,15 @@ class PeopleViewSet(viewsets.ModelViewSet):
         """
             Sending the welcome message
         """
-        return Response({'message' : 'Welcome message sent'}) 
+        return Response({'message' : 'Welcome message sent'})
 
     @action(detail=True, methods=['GET'])
     def welcome_message_person(self, request, pk=None):
         """
             Sending the welcome message to the person
-        """ 
-        return Response({'message' : f'Welcome message sent to person with id {pk}'}) 
-   
+        """
+        return Response({'message' : f'Welcome message sent to person with id {pk}'})
+
 class ListAPIViewCount(ListAPIView):
     '''
         List of people
@@ -214,13 +214,13 @@ class ListAPIViewCount(ListAPIView):
 
     def get_queryset(self):
         queryset = self.queryset
-        city_name = self.request.query_params.get('city', None) 
+        city_name = self.request.query_params.get('city', None)
         if city_name:
             queryset = queryset.filter(city__name=city_name)
         return queryset
 
 class PersonListAPIView(ListAPIView):
-    
+
     serializer_class = PeopleSerializer
     queryset = Person.objects.filter(
             Q(gender='M') | Q(city__name='New York'))\
@@ -334,9 +334,8 @@ class PersonCursorAPI(APIView):
             Get the list of people by applying CursorPagination
         '''
         person = Person.objects.select_related('city', 'color') \
-            .prefetch_related('hobbies').all().order_by('id')  
+            .prefetch_related('hobbies').all().order_by('id')
         paginator = CustomCursorPagination()
         person = paginator.paginate_queryset(person, request, view=self)
         serializer = PeopleSerializer(person, many=True)
         return paginator.get_paginated_response(serializer.data)
-

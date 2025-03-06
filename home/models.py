@@ -2,7 +2,6 @@ from django.utils import timezone
 from django.db import models
 from .managers.personManager import PesonManager
 
-
 class Colour(models.Model):
     name = models.CharField(max_length=100)
 
@@ -16,7 +15,7 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 class Hobby(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
 
